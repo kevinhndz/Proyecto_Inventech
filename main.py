@@ -18,7 +18,8 @@ def ver_materiales():
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT nombre, cantidad, categoria FROM materiales")
+        cursor.execute("""SELECT NombreMaterial, Cantidad, IDCategoría FROM Materiales""")
+
         registros = cursor.fetchall()
         conn.close()
 
