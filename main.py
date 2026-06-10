@@ -1,12 +1,18 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from dbconexion import get_connection
+from PIL import Image
+
 
 ctk.set_appearance_mode("System")   # usa el modo claro/oscuro del sistema
 ctk.set_default_color_theme("blue") # define el color principal
 
 # ventana principal
 ventana = ctk.CTk()
+fondo = ctk.CTkImage(Image.open("logotkinter.jpg"), size=(600,400))
+label_fondo = ctk.CTkLabel(ventana, image=fondo, text="")
+label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+
 ventana.title("Inventech - Gestión de Materiales")
 ventana.geometry("600x400")
 
