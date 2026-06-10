@@ -9,7 +9,5 @@ Inventech es un programa en Python para manejar materiales con una ventana grafi
 - `.env` → Guarda usuario, contraseña y nombre de la base de datos 
 
 
-## Cómo usar
 
-1. Crear el archivo `.env` con tus datos:
 
