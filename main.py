@@ -85,6 +85,11 @@ def agregar_material():
             form.destroy()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo agregar: {e}")
+            
+    ctk.CTkButton(form, text="Guardar", command=guardar).pack(pady=10)
+
+
+
 
 
 # Boton para ver materiales
