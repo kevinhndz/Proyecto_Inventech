@@ -13,6 +13,14 @@ def get_connection():
         database=os.getenv("DB_NAME")
     )
 
+def add_materials():
+    """Adds materials to database."""
+    pass
+
+def delete_materials():
+    """Removes materials from database."""
+    pass
+
 
 if __name__ == "__main__":
     try:
