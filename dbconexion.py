@@ -14,11 +14,11 @@ def get_connection():
     )
 
 def add_materials():
-    """Adds materials to database."""
+    """Add materials to database."""
     pass
 
 def delete_materials():
-    """Delets materials from database."""
+    """Delete materials from database."""
     pass
 
 
