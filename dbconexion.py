@@ -13,6 +13,13 @@ def get_connection():
         database=os.getenv("DB_NAME")
     )
 
+def agrega_materials():
+    """Add materials to database."""
+    pass
+
+def borra_materials():
+    pass
+
 
 if __name__ == "__main__":
     try:
