@@ -3,6 +3,7 @@ from tkinter import messagebox
 from dbconexion import get_connection
 from PIL import Image
 
+# "Aqui funciona el CRUD, solo falta Update"
 
 ctk.set_appearance_mode("System")   # usa el modo claro/oscuro del sistema
 ctk.set_default_color_theme("blue") # define el color principal
