@@ -18,7 +18,7 @@ def add_materials():
     pass
 
 def delete_materials():
-    """Removes materials from database."""
+    """Delets materials from database."""
     pass
 
 
