@@ -99,8 +99,20 @@ def eliminar_material():
 
     ctk.CTkLabel(form, text="Digite el ID del material a borrar:").pack(pady=10)
     entry_id = ctk.CTkEntry(form); entry_id.pack(pady=5)
+    
+    def borrar():
+        if not (id_material := entry_id.get()):
+            messagebox.showwarning("Campo vacio", "Ingrese el ID."); return
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM Materiales WHERE IDMaterial = %s", (id_material,))
+            conn.commit(); conn.close()
+            messagebox.showinfo( "Material eliminado."); form.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se puede eliminar: {e}")
 
-
+    ctk.CTkButton(form, text="Borrar", command=borrar).pack(pady=10)
 
 
 
@@ -114,7 +126,7 @@ boton_agregar = ctk.CTkButton(ventana, text="Agregar material", command=agregar_
 boton_agregar.pack(pady=10)
 
 # Boton para eliminar material
-boton_eliminar = ctk.CTkButton(ventana, text="Eliminar material")
+boton_eliminar = ctk.CTkButton(ventana, text="Eliminar material", command=eliminar_material)
 boton_eliminar.pack(pady=10)
 
 # mantiene la ventana abierta
