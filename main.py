@@ -36,6 +36,55 @@ def ver_materiales():
             messagebox.showinfo("Materiales", "No hay registros en la tabla.")
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrio un problema: {e}")
+        
+#agregar materiales
+        
+def agregar_material():
+    form = ctk.CTkToplevel(ventana)
+    form.title("Agregar Material")
+    form.geometry("300x300")
+
+    # Campos
+    ctk.CTkLabel(form, text="Nombre:").pack(pady=5)
+    entry_nombre = ctk.CTkEntry(form); entry_nombre.pack(pady=5)
+
+    ctk.CTkLabel(form, text="Cantidad:").pack(pady=5)
+    entry_cantidad = ctk.CTkEntry(form); entry_cantidad.pack(pady=5)
+
+    ctk.CTkLabel(form, text="ID Categoría:").pack(pady=5)
+    entry_categoria = ctk.CTkEntry(form); entry_categoria.pack(pady=5)
+
+    ctk.CTkLabel(form, text="ID Ubicación:").pack(pady=5)
+    entry_ubicacion = ctk.CTkEntry(form); entry_ubicacion.pack(pady=5)
+
+    ctk.CTkLabel(form, text="Fecha ingreso (YYYY-MM-DD):").pack(pady=5)
+    entry_fecha = ctk.CTkEntry(form); entry_fecha.pack(pady=5)
+
+    # Función interna para guardar
+    def guardar():
+        nombre = entry_nombre.get()
+        cantidad = entry_cantidad.get()
+        categoria = entry_categoria.get()
+        ubicacion = entry_ubicacion.get()
+        fecha = entry_fecha.get()
+
+        if not nombre or not cantidad or not categoria or not ubicacion or not fecha:
+            messagebox.showwarning("Campos vacíos", "Completa todos los campos.")
+            return
+
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO Materiales (NombreMaterial, Cantidad, IDCategoría, IDUbicación, FechaIngreso) VALUES (%s, %s, %s, %s, %s)",
+                (nombre, cantidad, categoria, ubicacion, fecha)
+            )
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Éxito", "Material agregado correctamente.")
+            form.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo agregar: {e}")
 
 
 # Boton para ver materiales
