@@ -89,6 +89,16 @@ def agregar_material():
             messagebox.showerror("Error", f"No se pudo agregar: {e}")
             
     ctk.CTkButton(form, text="Guardar", command=guardar).pack(pady=10)
+    
+
+def eliminar_material():
+    form = ctk.CTkToplevel(ventana)
+    form.title("Eliminar Material")
+    form.geometry("300x150")
+    form.lift(); form.focus_force()
+
+    ctk.CTkLabel(form, text="Digite el ID del material a borrar:").pack(pady=10)
+    entry_id = ctk.CTkEntry(form); entry_id.pack(pady=5)
 
 
 
