@@ -13,12 +13,11 @@ def get_connection():
         database=os.getenv("DB_NAME")
     )
 
-def add_materials():
+def agrega_materials():
     """Add materials to database."""
     pass
 
-def delete_materials():
-    """Delete materials from database."""
+def borra_materials():
     pass
 
 
