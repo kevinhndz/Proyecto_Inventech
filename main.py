@@ -41,6 +41,8 @@ def ver_materiales():
         
 def agregar_material():
     form = ctk.CTkToplevel(ventana)
+    form.lift()
+    form.focus_force()
     form.title("Agregar Material")
     form.geometry("300x300")
 
@@ -98,7 +100,7 @@ boton_ver.pack(pady=10)
 
 
 # Boton para agregar material
-boton_agregar = ctk.CTkButton(ventana, text="Agregar material")
+boton_agregar = ctk.CTkButton(ventana, text="Agregar material", command=agregar_material)
 boton_agregar.pack(pady=10)
 
 # Boton para eliminar material
