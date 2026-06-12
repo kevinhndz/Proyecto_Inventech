@@ -1,30 +1,59 @@
-import mysql.connector
+import sqlite3
 import os
-from dotenv import load_dotenv
+from datetime import datetime
 
-
-load_dotenv()
+DB_PATH = "inventech.db"
 
 def get_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
-    )
+    """Establece conexión con la base de datos SQLite."""
+    try:
+        conexion = sqlite3.connect(DB_PATH)
+        conexion.row_factory = sqlite3.Row
+        return conexion
+    except sqlite3.Error as e:
+        print(f"Error en la conexión: {e}")
+        raise
 
-def agrega_materials():
-    """Add materials to database."""
-    pass
+def validar_cantidad(cantidad):
+    """Valida que la cantidad sea un número positivo."""
+    try:
+        cantidad = int(cantidad)
+        if cantidad <= 0:
+            return False, "La cantidad debe ser mayor a 0"
+        return True, cantidad
+    except ValueError:
+        return False, "La cantidad debe ser un número entero"
 
-def borra_materials():
-    pass
+def validar_id(id_valor):
+    """Valida que el ID sea un número positivo."""
+    try:
+        id_valor = int(id_valor)
+        if id_valor <= 0:
+            return False, "El ID debe ser mayor a 0"
+        return True, id_valor
+    except ValueError:
+        return False, "El ID debe ser un número entero"
 
+def validar_fecha(fecha_str):
+    """Valida que la fecha esté en formato YYYY-MM-DD."""
+    try:
+        datetime.strptime(fecha_str, "%Y-%m-%d")
+        return True, fecha_str
+    except ValueError:
+        return False, "La fecha debe estar en formato YYYY-MM-DD"
+
+def validar_nombre(nombre):
+    """Valida que el nombre no esté vacío."""
+    if not nombre or len(nombre.strip()) == 0:
+        return False, "El nombre no puede estar vacío"
+    if len(nombre) > 100:
+        return False, "El nombre es muy largo (máximo 100 caracteres)"
+    return True, nombre.strip()
 
 if __name__ == "__main__":
     try:
         conn = get_connection()
-        print("Conexion exitosa a MySQL")
+        print("Conexión exitosa a SQLite")
         conn.close()
     except Exception as e:
-        print(" Error en la conexionn:", e)
+        print(f"✗ Error en la conexión: {e}")
