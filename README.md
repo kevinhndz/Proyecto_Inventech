@@ -1,14 +1,13 @@
 # Inventech
 
-Inventech es un programa en Python para manejar materiales con una ventana grafica y conexion a base de datos
+Inventech es un programa en Python de escritorio loca;
 
 ## Archivos
 
-- `dbconexion.py` → lo que hace es que  se conecta con la base de datos y prueba si funciona
-- `main.py` → muestra una ventana con un titulo y un boton
-- `.env` → Guarda usuario, contraseña y nombre de la base de datos .
+- `dbconexion.py` → este archivo ya viene configurado por asi decirlo para conectarse directo a MYSQL
+al importar la libreria get_connection() - esta trae un metodo que es el que ya viene configuarado para conectarse con la bd.
 
-
+- `main.py` → el programa
 
 
 
