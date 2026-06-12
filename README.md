@@ -1,6 +1,6 @@
 # Inventech
 
-Inventech es un programa en Python de escritorio loca;
+Inventech es un programa en Python de escritorio local
 
 ## Archivos
 
