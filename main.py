@@ -38,7 +38,7 @@ def ver_materiales():
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrio un problema: {e}")
         
-#agregar materiales
+#agregar materialesg
         
 def agregar_material():
     form = ctk.CTkToplevel(ventana)
