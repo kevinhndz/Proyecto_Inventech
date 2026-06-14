@@ -531,3 +531,22 @@ def listar_auditoria():
                   DescripcionCambio, FechaOperación FROM AuditLog ORDER BY FechaOperación DESC LIMIT 200""",
         fetch=True,
     )
+
+
+
+def validar_login(usuario_ingresado, password_ingresado):
+    if password_ingresado != "12345":
+        return False, None, None
+    
+    admins = ["roberto martinez", "ana valladares"]
+    
+    usuario_limpio = usuario_ingresado.lower().strip()
+    
+    usuario_limpio = usuario_limpio.replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+    
+    if usuario_limpio in admins:
+        rol = "Admin"
+    else:
+        rol = "Empleado"
+        
+    return True, rol, usuario_ingresado.strip()
