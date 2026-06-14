@@ -1,134 +1,120 @@
 import customtkinter as ctk
-from tkinter import messagebox
-from dbconexion import get_connection
-from PIL import Image
 
-# "Aqui funciona el CRUD, solo falta Update"
+from modulos import MODULOS_SIDEBAR
 
-ctk.set_appearance_mode("System")   # usa el modo claro/oscuro del sistema
-ctk.set_default_color_theme("blue") # define el color principal
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme("blue")
 
-# ventana principal
 ventana = ctk.CTk()
-fondo = ctk.CTkImage(Image.open("logotkinter.jpg"), size=(600,400))
-label_fondo = ctk.CTkLabel(ventana, image=fondo, text="")
-label_fondo.place(x=0, y=0, relwidth=1, relheight=1)
+ventana.title("Inventech - Sistema de Gestión")
+ventana.geometry("1100x720")
+ventana.minsize(900, 550)
 
-ventana.title("Inventech - Gestión de Materiales")
-ventana.geometry("600x400")
+ventana.grid_rowconfigure(0, weight=1)
+ventana.grid_columnconfigure(0, weight=0)
+ventana.grid_columnconfigure(1, weight=1)
 
-# titulo dentro de la ventana
-label = ctk.CTkLabel(ventana, text="Inventech - Gestion de Materiales", font=("Arial", 20))
-label.pack(pady=20)
+# ========== SIDEBAR ==========
+sidebar = ctk.CTkFrame(ventana, fg_color=("#f0f0f0", "#1a1a1a"), width=240)
+sidebar.grid(row=0, column=0, sticky="nsew")
+sidebar.grid_propagate(False)
+sidebar.grid_rowconfigure(1, weight=1)
 
-def ver_materiales():
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""SELECT NombreMaterial, Cantidad, IDCategoría FROM Materiales""")
+header_sidebar = ctk.CTkFrame(sidebar, fg_color=("#2563eb", "#1e40af"), height=90)
+header_sidebar.grid(row=0, column=0, sticky="ew")
+header_sidebar.grid_propagate(False)
+ctk.CTkLabel(header_sidebar, text="INVENTECH", font=("Arial", 16, "bold"), text_color="white").pack(pady=20)
 
-        registros = cursor.fetchall()
-        conn.close()
+botones_sidebar = ctk.CTkScrollableFrame(sidebar, fg_color="transparent")
+botones_sidebar.grid(row=1, column=0, sticky="nsew", padx=8, pady=10)
 
-        if registros:
-            texto = "\n".join([f"{nombre} - {cantidad} ({categoria})" for nombre, cantidad, categoria in registros])
-            messagebox.showinfo("Materiales", texto)
-        else:
-            messagebox.showinfo("Materiales", "No hay registros en la tabla.")
-    except Exception as e:
-        messagebox.showerror("Error", f"Ocurrio un problema: {e}")
-        
-#agregar materialesg
-        
-def agregar_material():
-    form = ctk.CTkToplevel(ventana)
-    form.lift()
-    form.focus_force()
-    form.title("Agregar Material")
-    form.geometry("300x300")
+# ========== ÁREA PRINCIPAL ==========
+frame_principal = ctk.CTkFrame(ventana)
+frame_principal.grid(row=0, column=1, sticky="nsew")
+frame_principal.grid_rowconfigure(1, weight=1)
+frame_principal.grid_columnconfigure(0, weight=1)
 
-    # Campos
-    ctk.CTkLabel(form, text="Nombre:").pack(pady=5)
-    entry_nombre = ctk.CTkEntry(form); entry_nombre.pack(pady=5)
+header_principal = ctk.CTkFrame(frame_principal, fg_color=("#e8f0ff", "#0f172a"), height=80)
+header_principal.grid(row=0, column=0, sticky="ew", padx=15, pady=15)
+header_principal.grid_propagate(False)
+ctk.CTkLabel(header_principal, text="Sistema de Gestión de Inventario", font=("Arial", 22, "bold")).pack(side="left", padx=10, pady=10)
 
-    ctk.CTkLabel(form, text="Cantidad:").pack(pady=5)
-    entry_cantidad = ctk.CTkEntry(form); entry_cantidad.pack(pady=5)
-
-    ctk.CTkLabel(form, text="ID Categoría:").pack(pady=5)
-    entry_categoria = ctk.CTkEntry(form); entry_categoria.pack(pady=5)
-
-    ctk.CTkLabel(form, text="ID Ubicación:").pack(pady=5)
-    entry_ubicacion = ctk.CTkEntry(form); entry_ubicacion.pack(pady=5)
-
-    ctk.CTkLabel(form, text="Fecha ingreso (YYYY-MM-DD):").pack(pady=5)
-    entry_fecha = ctk.CTkEntry(form); entry_fecha.pack(pady=5)
-
-    # Función interna para guardar
-    def guardar():
-        nombre = entry_nombre.get()
-        cantidad = entry_cantidad.get()
-        categoria = entry_categoria.get()
-        ubicacion = entry_ubicacion.get()
-        fecha = entry_fecha.get()
-
-        if not nombre or not cantidad or not categoria or not ubicacion or not fecha:
-            messagebox.showwarning("Campos vacíos", "Completa todos los campos.")
-            return
-
-        try:
-            conn = get_connection()
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO Materiales (NombreMaterial, Cantidad, IDCategoría, IDUbicación, FechaIngreso) VALUES (%s, %s, %s, %s, %s)",
-                (nombre, cantidad, categoria, ubicacion, fecha)
-            )
-            conn.commit()
-            conn.close()
-            messagebox.showinfo("Éxito", "Material agregado correctamente.")
-            form.destroy()
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo agregar: {e}")
-            
-    ctk.CTkButton(form, text="Guardar", command=guardar).pack(pady=10)
-    
-
-def eliminar_material():
-    form = ctk.CTkToplevel(ventana)
-    form.title("Eliminar Material")
-    form.geometry("300x150")
-    form.lift(); form.focus_force()
-
-    ctk.CTkLabel(form, text="Digite el ID del material a borrar:").pack(pady=10)
-    entry_id = ctk.CTkEntry(form); entry_id.pack(pady=5)
-    
-    def borrar():
-        if not (id_material := entry_id.get()):
-            messagebox.showwarning("Campo vacio", "Ingrese el ID."); return
-        try:
-            conn = get_connection()
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM Materiales WHERE IDMaterial = %s", (id_material,))
-            conn.commit(); conn.close()
-            messagebox.showinfo( "Material eliminado."); form.destroy()
-        except Exception as e:
-            messagebox.showerror("Error", f"No se puede eliminar: {e}")
-
-    ctk.CTkButton(form, text="Borrar", command=borrar).pack(pady=10)
+frame_contenido = ctk.CTkScrollableFrame(frame_principal, fg_color="transparent")
+frame_contenido.grid(row=1, column=0, sticky="nsew", padx=15, pady=10)
 
 
+def crear_boton_sidebar(parent, texto, comando):
+    return ctk.CTkButton(
+        parent,
+        text=texto,
+        command=comando,
+        height=38,
+        font=("Arial", 10, "bold"),
+        fg_color=("#3b82f6", "#1e40af"),
+        hover_color=("#2563eb", "#1e3a8a"),
+        text_color="white",
+        corner_radius=8,
+        anchor="w",
+    )
 
-# Boton para ver materiales
-boton_ver = ctk.CTkButton(ventana, text="Ver materiales", command=ver_materiales)
-boton_ver.pack(pady=10)
+
+def crear_seccion(parent, titulo, modulos):
+    ctk.CTkLabel(
+        parent,
+        text=titulo.upper(),
+        font=("Arial", 9, "bold"),
+        text_color=("#6b7280", "#9ca3af"),
+        anchor="w",
+    ).pack(pady=(12, 4), padx=4, fill="x")
+
+    for texto, handler in modulos:
+        btn = crear_boton_sidebar(parent, texto, lambda h=handler: h(ventana))
+        btn.pack(pady=3, fill="x")
 
 
-# Boton para agregar material
-boton_agregar = ctk.CTkButton(ventana, text="Agregar material", command=agregar_material)
-boton_agregar.pack(pady=10)
+for seccion, modulos in MODULOS_SIDEBAR:
+    crear_seccion(botones_sidebar, seccion, modulos)
 
-# Boton para eliminar material
-boton_eliminar = ctk.CTkButton(ventana, text="Eliminar material", command=eliminar_material)
-boton_eliminar.pack(pady=10)
+ctk.CTkFrame(botones_sidebar, fg_color=("#d1d5db", "#374151"), height=2).pack(pady=12, fill="x")
+crear_boton_sidebar(botones_sidebar, "Salir", ventana.quit).pack(pady=4, fill="x")
 
-# mantiene la ventana abierta
-ventana.mainloop()
+footer_sidebar = ctk.CTkFrame(sidebar, fg_color="transparent", height=60)
+footer_sidebar.grid(row=2, column=0, sticky="sew", padx=10, pady=8)
+ctk.CTkLabel(footer_sidebar, text="v3.0 - Todos los módulos", font=("Arial", 8), text_color=("#6b7280", "#9ca3af")).pack()
+ctk.CTkLabel(footer_sidebar, text="© 2026 Inventech", font=("Arial", 8), text_color=("#6b7280", "#9ca3af")).pack()
+
+# ========== PANTALLA DE BIENVENIDA ==========
+frame_welcome = ctk.CTkFrame(frame_contenido, fg_color="transparent")
+frame_welcome.pack(fill="both", expand=True, padx=10, pady=20)
+
+ctk.CTkLabel(
+    frame_welcome,
+    text="Bienvenido a Inventech",
+    font=("Arial", 20, "bold"),
+).pack(pady=(10, 5))
+
+ctk.CTkLabel(
+    frame_welcome,
+    text="Gestión integral de inventario, compras, préstamos y mantenimientos.",
+    font=("Arial", 12),
+    text_color=("#6b7280", "#9ca3af"),
+).pack(pady=5)
+
+modulos_info = [
+    ("Catálogos", "Categorías, ubicaciones y proveedores"),
+    ("Inventario", "Materiales, movimientos, alertas e historial"),
+    ("Operaciones", "Compras, préstamos y mantenimientos"),
+    ("Sistema", "Usuarios, roles, reportes y auditoría"),
+]
+
+frame_cards = ctk.CTkFrame(frame_welcome, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
+frame_cards.pack(pady=25, padx=10, fill="both")
+
+for titulo, desc in modulos_info:
+    row = ctk.CTkFrame(frame_cards, fg_color="transparent")
+    row.pack(pady=10, padx=15, fill="x")
+    ctk.CTkLabel(row, text=titulo, font=("Arial", 11, "bold"), width=120, anchor="w").pack(side="left")
+    ctk.CTkLabel(row, text=desc, font=("Arial", 10), text_color=("#6b7280", "#9ca3af"), anchor="w").pack(side="left", padx=10)
+
+if __name__ == "__main__":
+    ventana.mainloop()
