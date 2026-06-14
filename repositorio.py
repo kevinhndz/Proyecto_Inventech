@@ -1,5 +1,6 @@
 """Capa de acceso a datos para todos los módulos de Inventech."""
 
+import sqlite3
 from dbconexion import get_connection
 
 
@@ -9,9 +10,10 @@ def _ejecutar(query, params=(), fetch=False, fetchone=False, commit=False):
         cursor = conn.cursor()
         cursor.execute(query, params)
         if fetchone:
-            return cursor.fetchone()
+            res = cursor.fetchone()
+            return list(res) if res is not None else None
         if fetch:
-            return cursor.fetchall()
+            return [list(fila) for fila in cursor.fetchall()]
         if commit:
             conn.commit()
             return cursor.rowcount
@@ -222,10 +224,13 @@ def eliminar_proveedor(id_prov):
 
 def listar_materiales():
     return _ejecutar(
-        """SELECT m.IDMaterial, m.NombreMaterial, m.Cantidad, c.NombreCategoría, u.NombreUbicación, m.FechaIngreso
+        """SELECT m.IDMaterial, m.NombreMaterial, m.Cantidad, 
+                  COALESCE(c.NombreCategoría, 'Sin Categoría'), 
+                  COALESCE(u.NombreUbicación, 'Sin Ubicación'), 
+                  m.FechaIngreso
            FROM Materiales m
-           JOIN Categorias c ON m.IDCategoría = c.IDCategoría
-           JOIN Ubicaciones u ON m.IDUbicación = u.IDUbicación
+           LEFT JOIN Categorias c ON m.IDCategoría = c.IDCategoría
+           LEFT JOIN Ubicaciones u ON m.IDUbicación = u.IDUbicación
            ORDER BY m.IDMaterial""",
         fetch=True,
     )
@@ -381,12 +386,12 @@ def listar_detalle_compras(id_compra=None):
     return _ejecutar(query + " ORDER BY d.IDCompra DESC, d.IDDetalleCompra", fetch=True)
 
 
-def crear_compra(id_proveedor, descripcion="", usuario="Sistema"):
+def crear_compra(id_proveedor, description="", usuario="Sistema"):
     rid = _ejecutar(
         "INSERT INTO Compras (IDProveedor, Descripción, UsuarioResponsable) VALUES (?, ?, ?)",
-        (id_proveedor, descripcion, usuario),
+        (id_proveedor, description, usuario),
     )
-    registrar_auditoria("INSERT", "Compras", rid, usuario, descripcion)
+    registrar_auditoria("INSERT", "Imports", rid, usuario, description)
     return rid
 
 
@@ -409,14 +414,14 @@ def completar_compra(id_compra, usuario="Sistema"):
         raise ValueError("Compra no encontrada")
     if compra[0] != "Pendiente":
         raise ValueError("La compra ya fue procesada")
-    detalles = _ejecutar(
+    detalles_items = _ejecutar(
         "SELECT IDMaterial, Cantidad FROM DetalleCompras WHERE IDCompra = ?",
         (id_compra,),
         fetch=True,
     )
-    if not detalles:
+    if not detalles_items:
         raise ValueError("La compra no tiene artículos")
-    for id_mat, cant in detalles:
+    for id_mat, cant in detalles_items:
         registrar_movimiento(id_mat, "Entrada", cant, f"Compra #{id_compra}", usuario)
     _ejecutar("UPDATE Compras SET Estado = 'Completada' WHERE IDCompra = ?", (id_compra,), commit=True)
     registrar_auditoria("UPDATE", "Compras", id_compra, usuario, "Compra completada")
@@ -464,14 +469,14 @@ def devolver_prestamo(id_prestamo, usuario="Sistema"):
         raise ValueError("Préstamo no encontrado")
     if prestamo[0] != "Pendiente":
         raise ValueError("El préstamo ya fue devuelto o cancelado")
-    detalles = _ejecutar(
+    detalles_items = _ejecutar(
         "SELECT IDMaterial, Cantidad FROM DetallePrestamos WHERE IDPrestamo = ? AND DevueltoCompletamente = 0",
         (id_prestamo,),
         fetch=True,
     )
-    if not detalles:
+    if not detalles_items:
         raise ValueError("No hay artículos pendientes de devolución")
-    for id_mat, cant in detalles:
+    for id_mat, cant in detalles_items:
         registrar_movimiento(id_mat, "Entrada", cant, f"Devolución préstamo #{id_prestamo}", usuario)
     _ejecutar(
         "UPDATE DetallePrestamos SET DevueltoCompletamente = 1, FechaDevolución = date('now') WHERE IDPrestamo = ?",
@@ -533,20 +538,14 @@ def listar_auditoria():
     )
 
 
-
 def validar_login(usuario_ingresado, password_ingresado):
     if password_ingresado != "12345":
         return False, None, None
-    
     admins = ["roberto martinez", "ana valladares"]
-    
     usuario_limpio = usuario_ingresado.lower().strip()
-    
     usuario_limpio = usuario_limpio.replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
-    
     if usuario_limpio in admins:
         rol = "Admin"
     else:
         rol = "Empleado"
-        
     return True, rol, usuario_ingresado.strip()
